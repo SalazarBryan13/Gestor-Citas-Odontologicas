@@ -39,6 +39,15 @@ def enviar_notificacion_email(nombre_paciente, fecha, hora):
     # Simulación de envío de email
     print(f"Notificación enviada a {nombre_paciente} para la cita del {fecha} a las {hora}")
 
+# Agregar validación para evitar citas duplicadas
+def verificar_cita_duplicada(fecha, hora):
+    conn = sqlite3.connect('citas.db')
+    c = conn.cursor()
+    c.execute('SELECT COUNT(*) FROM citas WHERE fecha = ? AND hora = ?', (fecha, hora))
+    count = c.fetchone()[0]
+    conn.close()
+    return count > 0
+
 @app.get("/")
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
@@ -64,6 +73,8 @@ async def crear_cita(
     motivo: str = Form(...),
     telefono: str = Form(...)
 ):
+    if verificar_cita_duplicada(fecha, hora):
+        raise HTTPException(status_code=400, detail="Ya existe una cita programada para esta fecha y hora.")
     conn = sqlite3.connect('citas.db')
     c = conn.cursor()
     c.execute('''
