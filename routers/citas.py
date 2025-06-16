@@ -1,22 +1,21 @@
-from fastapi import APIRouter, Request, Form, HTTPException
+from fastapi import APIRouter, Request, Form, HTTPException, Depends
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 import sqlite3
 from db import verificar_cita_duplicada
 from notificaciones import enviar_notificacion_email
+from auth import manager
 
 templates = Jinja2Templates(directory="templates")
 router = APIRouter()
 
-@router.get("/")
-async def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
 
 @router.get("/citas")
-async def listar_citas(request: Request):
+async def listar_citas(request: Request, user=Depends(manager)):
+    usuario_id = user['id']
     conn = sqlite3.connect('citas.db')
     c = conn.cursor()
-    c.execute('SELECT * FROM citas ORDER BY fecha, hora')
+    c.execute('SELECT * FROM citas WHERE usuario_id = ? ORDER BY fecha, hora', (usuario_id,))
     citas = c.fetchall()
     conn.close()
     return templates.TemplateResponse("citas.html", {"request": request, "citas": citas})
@@ -27,43 +26,53 @@ async def nueva_cita_form(request: Request):
 
 @router.post("/nueva-cita")
 async def crear_cita(
+    request: Request,
     nombre_paciente: str = Form(...),
     fecha: str = Form(...),
     hora: str = Form(...),
     motivo: str = Form(...),
-    telefono: str = Form(...)
+    telefono: str = Form(...),
+    user=Depends(manager)
 ):
+    usuario_id = user['id']
     if verificar_cita_duplicada(fecha, hora):
         raise HTTPException(status_code=400, detail="Ya existe una cita programada para esta fecha y hora.")
     conn = sqlite3.connect('citas.db')
     c = conn.cursor()
     c.execute('''
-        INSERT INTO citas (nombre_paciente, fecha, hora, motivo, telefono)
-        VALUES (?, ?, ?, ?, ?)
-    ''', (nombre_paciente, fecha, hora, motivo, telefono))
+        INSERT INTO citas (nombre_paciente, fecha, hora, motivo, telefono, usuario_id)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', (nombre_paciente, fecha, hora, motivo, telefono, usuario_id))
     conn.commit()
     conn.close()
     enviar_notificacion_email(nombre_paciente, fecha, hora)
     return RedirectResponse(url="/citas", status_code=303)
 
 @router.get("/eliminar-cita/{cita_id}")
-async def eliminar_cita(cita_id: int):
+async def eliminar_cita(cita_id: int, user=Depends(manager)):
+    usuario_id = user['id']
     conn = sqlite3.connect('citas.db')
     c = conn.cursor()
-    c.execute('DELETE FROM citas WHERE id = ?', (cita_id,))
+    c.execute('SELECT * FROM citas WHERE id = ? AND usuario_id = ?', (cita_id, usuario_id))
+    cita = c.fetchone()
+    if not cita:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Cita no encontrada o no autorizada")
+    c.execute('DELETE FROM citas WHERE id = ? AND usuario_id = ?', (cita_id, usuario_id))
     conn.commit()
     conn.close()
     return RedirectResponse(url="/citas", status_code=303)
 
 @router.get("/editar-cita/{cita_id}")
-async def editar_cita_form(request: Request, cita_id: int):
+async def editar_cita_form(request: Request, cita_id: int, user=Depends(manager)):
+    usuario_id = user['id']
     conn = sqlite3.connect('citas.db')
     c = conn.cursor()
-    c.execute('SELECT * FROM citas WHERE id = ?', (cita_id,))
+    c.execute('SELECT * FROM citas WHERE id = ? AND usuario_id = ?', (cita_id, usuario_id))
     cita = c.fetchone()
     conn.close()
     if not cita:
-        raise HTTPException(status_code=404, detail="Cita no encontrada")
+        raise HTTPException(status_code=404, detail="Cita no encontrada o no autorizada")
     return templates.TemplateResponse("editar_cita.html", {"request": request, "cita": cita})
 
 @router.post("/editar-cita/{cita_id}")
@@ -73,13 +82,20 @@ async def editar_cita(
     fecha: str = Form(...),
     hora: str = Form(...),
     motivo: str = Form(...),
-    telefono: str = Form(...)
+    telefono: str = Form(...),
+    user=Depends(manager)
 ):
+    usuario_id = user['id']
     conn = sqlite3.connect('citas.db')
     c = conn.cursor()
+    c.execute('SELECT * FROM citas WHERE id = ? AND usuario_id = ?', (cita_id, usuario_id))
+    cita = c.fetchone()
+    if not cita:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Cita no encontrada o no autorizada")
     c.execute('''
-        UPDATE citas SET nombre_paciente=?, fecha=?, hora=?, motivo=?, telefono=? WHERE id=?
-    ''', (nombre_paciente, fecha, hora, motivo, telefono, cita_id))
+        UPDATE citas SET nombre_paciente=?, fecha=?, hora=?, motivo=?, telefono=? WHERE id=? AND usuario_id=?
+    ''', (nombre_paciente, fecha, hora, motivo, telefono, cita_id, usuario_id))
     conn.commit()
     conn.close()
     return RedirectResponse(url="/citas", status_code=303) 
