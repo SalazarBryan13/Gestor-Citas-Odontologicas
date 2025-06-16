@@ -1,0 +1,29 @@
+ESTRATEGIA DE RAMIFICACIÓN (BRANCHING STRATEGY)
+
+1. main
+   - Código en producción (versión utilizada por odontólogos y pacientes).
+   - Solo recibe merges de release/* y hotfix/*.
+
+2. develop
+   - Integración de nuevas funcionalidades antes de producción.
+   - Recibe merges de feature/*, bugfix/*, release/* y hotfix/*.
+
+3. feature/*
+   - Desarrollo de nuevas características.
+   - Ejemplo: feature/notificaciones-email, feature/registro-pacientes.
+   - Se crean desde develop y se mergean de vuelta a develop.
+
+4. bugfix/*
+   - Corrección de errores.
+   - Ejemplo: bugfix/evitar-citas-duplicadas.
+   - Se crean desde develop y se mergean de vuelta a develop.
+
+5. hotfix/*
+   - Arreglos urgentes en producción.
+   - Ejemplo: hotfix/fix-login-odontologo.
+   - Se crean desde main y se mergean a main y develop.
+
+6. release/*
+   - Preparación de versiones para producción.
+   - Ejemplo: release/v1.0.0, release/v1.1.0.
+   - Se crean desde develop y se mergean a main y develop. 
