@@ -33,13 +33,6 @@ async def crear_cita(
     motivo: str = Form(...),
     telefono: str = Form(...)
 ):
-    # Validación de hora en backend
-    try:
-        horas, minutos = map(int, hora.split(":"))
-        if horas < 9 or horas > 17 or (horas == 17 and minutos > 0):
-            raise HTTPException(status_code=400, detail="La hora debe estar entre 09:00 y 17:00")
-    except Exception:
-        raise HTTPException(status_code=400, detail="Formato de hora inválido")
     if verificar_cita_duplicada(fecha, hora):
         raise HTTPException(status_code=400, detail="Ya existe una cita programada para esta fecha y hora.")
     conn = sqlite3.connect('citas.db')

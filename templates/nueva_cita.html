@@ -57,17 +57,13 @@
 
                         <div class="col-md-6">
                             <div class="form-floating">
-                                <input type="time" class="form-control" id="hora" name="hora" 
-                                       min="09:00" max="17:00" step="1800" required>
+                                <input type="time" class="form-control" id="hora" name="hora" required>
                                 <label for="hora">
                                     <i class="fas fa-clock me-2 text-muted"></i>Hora
                                 </label>
                                 <div class="invalid-feedback">
-                                    Por favor seleccione una hora entre 9:00 AM y 5:00 PM
+                                    Por favor seleccione una hora
                                 </div>
-                                <small class="form-text text-muted mt-1">
-                                    Horario de atención: 9:00 AM - 5:00 PM
-                                </small>
                             </div>
                         </div>
 
@@ -119,17 +115,5 @@
 
 // Validación de fecha mínima
 document.getElementById('fecha').min = new Date().toISOString().split('T')[0];
-
-// Validación de hora
-document.getElementById('hora').addEventListener('change', function() {
-    const hora = this.value;
-    const [horas, minutos] = hora.split(':').map(Number);
-    
-    if (horas < 9 || horas > 17 || (horas === 17 && minutos > 0)) {
-        this.setCustomValidity('La hora debe estar entre 9:00 AM y 5:00 PM');
-    } else {
-        this.setCustomValidity('');
-    }
-});
 </script>
 {% endblock %} 
