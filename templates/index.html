@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio - Gestor de Citas Odontológicas{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 text-center">
+        <h1 class="display-4 mb-4">Bienvenido al Gestor de Citas Odontológicas</h1>
+        <p class="lead mb-4">Sistema simple y eficiente para gestionar citas odontológicas</p>
+        
+        <div class="row mt-5">
+            <div class="col-md-6">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Ver Citas</h5>
+                        <p class="card-text">Consulta todas las citas programadas</p>
+                        <a href="/citas" class="btn btn-primary">Ver Citas</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Nueva Cita</h5>
+                        <p class="card-text">Agenda una nueva cita odontológica</p>
+                        <a href="/nueva-cita" class="btn btn-success">Agendar Cita</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
