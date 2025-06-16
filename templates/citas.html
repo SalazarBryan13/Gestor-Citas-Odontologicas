@@ -3,54 +3,97 @@
 {% block title %}Citas - Gestor de Citas Odontológicas{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Lista de Citas</h2>
-            <a href="/nueva-cita" class="btn btn-success">
-                <i class="bi bi-plus-circle"></i> Nueva Cita
-            </a>
-        </div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">
+        <i class="fas fa-calendar-alt me-2 text-primary"></i>
+        Citas Programadas
+    </h1>
+    <a href="/nueva-cita" class="btn btn-primary">
+        <i class="fas fa-plus-circle me-2"></i>Nueva Cita
+    </a>
+</div>
 
-        {% if citas %}
+{% if citas %}
+<div class="card">
+    <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-striped table-hover">
+            <table class="table table-hover mb-0">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th class="ps-4">ID</th>
                         <th>Paciente</th>
                         <th>Fecha</th>
                         <th>Hora</th>
                         <th>Motivo</th>
                         <th>Teléfono</th>
-                        <th>Acciones</th>
+                        <th class="text-end pe-4">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for cita in citas %}
                     <tr>
-                        <td>{{ cita[0] }}</td>
-                        <td>{{ cita[1] }}</td>
+                        <td class="ps-4">{{ cita[0] }}</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-primary bg-opacity-10 p-2 me-2">
+                                    <i class="fas fa-user text-primary"></i>
+                                </div>
+                                {{ cita[1] }}
+                            </div>
+                        </td>
                         <td>{{ cita[2] }}</td>
                         <td>{{ cita[3] }}</td>
-                        <td>{{ cita[4] }}</td>
-                        <td>{{ cita[5] }}</td>
                         <td>
-                            <a href="/eliminar-cita/{{ cita[0] }}" class="btn btn-danger btn-sm" 
-                               onclick="return confirm('¿Está seguro de eliminar esta cita?')">
-                                <i class="bi bi-trash"></i> Eliminar
+                            <span class="badge bg-info bg-opacity-10 text-info">
+                                {{ cita[4] }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="tel:{{ cita[5] }}" class="text-decoration-none">
+                                <i class="fas fa-phone-alt me-1 text-muted"></i>
+                                {{ cita[5] }}
                             </a>
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="btn-group">
+                                <a href="/editar-cita/{{ cita[0] }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-outline-danger" 
+                                        onclick="confirmarEliminar({{ cita[0] }})">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-        {% else %}
-        <div class="alert alert-info">
-            No hay citas programadas. <a href="/nueva-cita">Agendar una nueva cita</a>
-        </div>
-        {% endif %}
     </div>
 </div>
+{% else %}
+<div class="text-center py-5">
+    <div class="mb-4">
+        <i class="fas fa-calendar-times fa-4x text-muted"></i>
+    </div>
+    <h3 class="h4 text-muted mb-3">No hay citas programadas</h3>
+    <p class="text-muted mb-4">Comienza agendando una nueva cita para tus pacientes</p>
+    <a href="/nueva-cita" class="btn btn-primary">
+        <i class="fas fa-plus-circle me-2"></i>Agendar Nueva Cita
+    </a>
+</div>
+{% endif %}
+
+<a href="/nueva-cita" class="floating-btn">
+    <i class="fas fa-plus"></i>
+</a>
+
+<script>
+function confirmarEliminar(id) {
+    if (confirm('¿Estás seguro de que deseas eliminar esta cita?')) {
+        window.location.href = `/eliminar-cita/${id}`;
+    }
+}
+</script>
 {% endblock %} 

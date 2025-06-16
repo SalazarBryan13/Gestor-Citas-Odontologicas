@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Cita - Gestor de Citas Odontológicas{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
+                        <i class="fas fa-calendar-edit fa-2x text-primary"></i>
+                    </div>
+                    <h2 class="card-title mb-0">Editar Cita</h2>
+                </div>
+                <form method="POST" class="needs-validation" novalidate>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="nombre_paciente" name="nombre_paciente" value="{{ cita[1] }}" required>
+                                <label for="nombre_paciente">
+                                    <i class="fas fa-user me-2 text-muted"></i>Nombre del Paciente
+                                </label>
+                                <div class="invalid-feedback">
+                                    Por favor ingrese el nombre del paciente
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="tel" class="form-control" id="telefono" name="telefono" value="{{ cita[5] }}" required>
+                                <label for="telefono">
+                                    <i class="fas fa-phone me-2 text-muted"></i>Teléfono
+                                </label>
+                                <div class="invalid-feedback">
+                                    Por favor ingrese un número de teléfono válido
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="date" class="form-control" id="fecha" name="fecha" value="{{ cita[2] }}" required>
+                                <label for="fecha">
+                                    <i class="fas fa-calendar me-2 text-muted"></i>Fecha
+                                </label>
+                                <div class="invalid-feedback">
+                                    Por favor seleccione una fecha válida
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="time" class="form-control" id="hora" name="hora" value="{{ cita[3] }}" required>
+                                <label for="hora">
+                                    <i class="fas fa-clock me-2 text-muted"></i>Hora
+                                </label>
+                                <div class="invalid-feedback">
+                                    Por favor seleccione una hora
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-floating">
+                                <textarea class="form-control" id="motivo" name="motivo" style="height: 100px" required>{{ cita[4] }}</textarea>
+                                <label for="motivo">
+                                    <i class="fas fa-comment-medical me-2 text-muted"></i>Motivo de la Cita
+                                </label>
+                                <div class="invalid-feedback">
+                                    Por favor ingrese el motivo de la cita
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="d-flex gap-2 justify-content-end">
+                                <a href="/citas" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-2"></i>Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Guardar Cambios
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+(function () {
+    'use strict'
+    var forms = document.querySelectorAll('.needs-validation')
+    Array.prototype.slice.call(forms).forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault()
+                event.stopPropagation()
+            }
+            form.classList.add('was-validated')
+        }, false)
+    })
+})()
+</script>
+{% endblock %} 

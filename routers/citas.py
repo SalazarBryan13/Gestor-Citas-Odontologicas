@@ -53,4 +53,33 @@ async def eliminar_cita(cita_id: int):
     c.execute('DELETE FROM citas WHERE id = ?', (cita_id,))
     conn.commit()
     conn.close()
+    return RedirectResponse(url="/citas", status_code=303)
+
+@router.get("/editar-cita/{cita_id}")
+async def editar_cita_form(request: Request, cita_id: int):
+    conn = sqlite3.connect('citas.db')
+    c = conn.cursor()
+    c.execute('SELECT * FROM citas WHERE id = ?', (cita_id,))
+    cita = c.fetchone()
+    conn.close()
+    if not cita:
+        raise HTTPException(status_code=404, detail="Cita no encontrada")
+    return templates.TemplateResponse("editar_cita.html", {"request": request, "cita": cita})
+
+@router.post("/editar-cita/{cita_id}")
+async def editar_cita(
+    cita_id: int,
+    nombre_paciente: str = Form(...),
+    fecha: str = Form(...),
+    hora: str = Form(...),
+    motivo: str = Form(...),
+    telefono: str = Form(...)
+):
+    conn = sqlite3.connect('citas.db')
+    c = conn.cursor()
+    c.execute('''
+        UPDATE citas SET nombre_paciente=?, fecha=?, hora=?, motivo=?, telefono=? WHERE id=?
+    ''', (nombre_paciente, fecha, hora, motivo, telefono, cita_id))
+    conn.commit()
+    conn.close()
     return RedirectResponse(url="/citas", status_code=303) 
