@@ -1,0 +1,16 @@
+name: Custom Actions Example
+
+on:
+  workflow_dispatch:
+
+jobs:
+  info:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print repository info
+        run: |
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref }}"
+      - name: List files
+        run: |
+          ls -la 

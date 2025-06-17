@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Gestor de Citas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="/dashboard">
+                <i class="fas fa-calendar-check me-2"></i>
+                Gestor de Citas
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/dashboard">
+                            <i class="fas fa-home me-1"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/appointments">
+                            <i class="fas fa-calendar-alt me-1"></i> Citas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/doctors">
+                            <i class="fas fa-user-md me-1"></i> Doctores
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/patients">
+                            <i class="fas fa-users me-1"></i> Pacientes
+                        </a>
+                    </li>
+                </ul>
+                <button class="btn btn-outline-light" onclick="logout()">
+                    <i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Stats Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <i class="fas fa-calendar-check fa-2x mb-3"></i>
+                    <h3 id="totalAppointments">0</h3>
+                    <p>Total de Citas</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <i class="fas fa-user-md fa-2x mb-3"></i>
+                    <h3 id="totalDoctors">0</h3>
+                    <p>Doctores Activos</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <i class="fas fa-users fa-2x mb-3"></i>
+                    <h3 id="totalPatients">0</h3>
+                    <p>Pacientes Registrados</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <i class="fas fa-clock fa-2x mb-3"></i>
+                    <h3 id="todayAppointments">0</h3>
+                    <p>Citas Hoy</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Appointments Table -->
+        <div class="card fade-in">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    Próximas Citas
+                </h5>
+                <button class="btn btn-primary" onclick="openAppointmentModal()">
+                    <i class="fas fa-plus me-1"></i> Nueva Cita
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Fecha y Hora</th>
+                                <th>Doctor</th>
+                                <th>Paciente</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointmentsTableBody">
+                            <tr>
+                                <td colspan="5" class="text-center">Cargando citas...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointment Modal -->
+    <div class="modal fade" id="appointmentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="appointmentModalLabel">Nueva Cita</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="appointmentForm">
+                        <input type="hidden" id="appointmentId">
+                        <div class="mb-3">
+                            <label class="form-label">Doctor</label>
+                            <select class="form-select" id="doctorId" required>
+                                <option value="">Seleccione un doctor</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Paciente</label>
+                            <select class="form-select" id="patientId" required>
+                                <option value="">Seleccione un paciente</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Fecha y Hora</label>
+                            <input type="datetime-local" class="form-control" id="dateTime" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Estado</label>
+                            <select class="form-select" id="status" required>
+                                <option value="scheduled">Programada</option>
+                                <option value="completed">Completada</option>
+                                <option value="cancelled">Cancelada</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveAppointment()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let appointmentModal;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            appointmentModal = new bootstrap.Modal(document.getElementById('appointmentModal'));
+            loadAppointments();
+            loadDoctors();
+            loadPatients();
+        });
+
+        function openAppointmentModal() {
+            document.getElementById('appointmentId').value = '';
+            document.getElementById('appointmentForm').reset();
+            document.getElementById('appointmentModalLabel').textContent = 'Nueva Cita';
+            appointmentModal.show();
+        }
+
+        async function loadDoctors() {
+            try {
+                const response = await fetch('/doctors/');
+                if (!response.ok) {
+                    throw new Error('Error al cargar los doctores');
+                }
+                const doctors = await response.json();
+                const select = document.getElementById('doctorId');
+                select.innerHTML = '<option value="">Seleccione un doctor</option>';
+                doctors.forEach(doctor => {
+                    select.innerHTML += `<option value="${doctor.id}">${doctor.name} - ${doctor.specialization}</option>`;
+                });
+            } catch (error) {
+                alert('Error al cargar los doctores: ' + error.message);
+            }
+        }
+
+        async function loadPatients() {
+            try {
+                const response = await fetch('/patients/');
+                if (!response.ok) {
+                    throw new Error('Error al cargar los pacientes');
+                }
+                const patients = await response.json();
+                const select = document.getElementById('patientId');
+                select.innerHTML = '<option value="">Seleccione un paciente</option>';
+                patients.forEach(patient => {
+                    select.innerHTML += `<option value="${patient.id}">${patient.name}</option>`;
+                });
+            } catch (error) {
+                alert('Error al cargar los pacientes: ' + error.message);
+            }
+        }
+
+        async function loadAppointments() {
+            try {
+                const response = await fetch('/appointments/');
+                if (!response.ok) {
+                    throw new Error('Error al cargar las citas');
+                }
+                const appointments = await response.json();
+                const tbody = document.querySelector('#appointmentsTableBody');
+                tbody.innerHTML = '';
+                
+                if (appointments.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center">No hay citas registradas</td></tr>';
+                    return;
+                }
+                
+                for (const appointment of appointments) {
+                    const doctorResponse = await fetch(`/doctors/${appointment.doctor_id}`);
+                    const patientResponse = await fetch(`/patients/${appointment.patient_id}`);
+                    const doctor = await doctorResponse.json();
+                    const patient = await patientResponse.json();
+                    
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${new Date(appointment.date_time).toLocaleString()}</td>
+                        <td>${doctor.name}</td>
+                        <td>${patient.name}</td>
+                        <td>${getStatusText(appointment.status)}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary me-2" onclick="editAppointment(${appointment.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteAppointment(${appointment.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+            } catch (error) {
+                alert('Error al cargar las citas: ' + error.message);
+            }
+        }
+
+        function getStatusText(status) {
+            const statusMap = {
+                'scheduled': 'Programada',
+                'completed': 'Completada',
+                'cancelled': 'Cancelada'
+            };
+            return statusMap[status] || status;
+        }
+
+        async function editAppointment(id) {
+            try {
+                const response = await fetch(`/appointments/${id}`);
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Error al cargar los datos de la cita');
+                }
+                const appointment = await response.json();
+                
+                document.getElementById('appointmentId').value = appointment.id;
+                document.getElementById('dateTime').value = appointment.date_time.slice(0, 16);
+                document.getElementById('doctorId').value = appointment.doctor_id;
+                document.getElementById('patientId').value = appointment.patient_id;
+                document.getElementById('status').value = appointment.status;
+                
+                document.getElementById('appointmentModalLabel').textContent = 'Editar Cita';
+                appointmentModal.show();
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        async function saveAppointment() {
+            const appointmentId = document.getElementById('appointmentId').value;
+            const appointmentData = {
+                date_time: document.getElementById('dateTime').value,
+                doctor_id: parseInt(document.getElementById('doctorId').value),
+                patient_id: parseInt(document.getElementById('patientId').value),
+                status: document.getElementById('status').value
+            };
+
+            try {
+                const url = appointmentId ? `/appointments/${appointmentId}` : '/appointments/';
+                const method = appointmentId ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(appointmentData)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Error al guardar la cita');
+                }
+
+                alert(appointmentId ? 'Cita actualizada exitosamente' : 'Cita guardada exitosamente');
+                appointmentModal.hide();
+                
+                // Limpiar el formulario
+                document.getElementById('appointmentForm').reset();
+                document.getElementById('appointmentId').value = '';
+                
+                // Recargar la tabla de citas
+                await loadAppointments();
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        async function deleteAppointment(id) {
+            if (!confirm('¿Está seguro de que desea eliminar esta cita?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/appointments/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Error al eliminar la cita');
+                }
+                
+                alert(data.message);
+                await loadAppointments();
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        async function logout() {
+            try {
+                const response = await fetch('/logout', {
+                    method: 'POST'
+                });
+                if (response.ok) {
+                    window.location.href = '/login';
+                } else {
+                    throw new Error('Error al cerrar sesión');
+                }
+            } catch (error) {
+                alert('Error al cerrar sesión: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html> 

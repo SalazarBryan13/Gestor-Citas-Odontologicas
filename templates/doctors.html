@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctores - Gestor de Citas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+    <style>
+        .alert {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+            padding: 1rem 1.5rem;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            color: #155724;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, #fff3cd, #ffeeba);
+            color: #856404;
+        }
+
+        .alert i {
+            font-size: 1.5rem;
+            margin-right: 1rem;
+        }
+
+        .alert .btn-close {
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+
+        .alert .btn-close:hover {
+            opacity: 1;
+        }
+
+        .alert-content {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .alert-message {
+            flex-grow: 1;
+            font-size: 1.1rem;
+            line-height: 1.4;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .alert.show {
+            animation: slideIn 0.3s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="/dashboard">
+                <i class="fas fa-calendar-check me-2"></i>
+                Gestor de Citas
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">
+                            <i class="fas fa-home me-1"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/appointments">
+                            <i class="fas fa-calendar-alt me-1"></i> Citas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/doctors">
+                            <i class="fas fa-user-md me-1"></i> Doctores
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/patients">
+                            <i class="fas fa-users me-1"></i> Pacientes
+                        </a>
+                    </li>
+                </ul>
+                <button class="btn btn-outline-light" onclick="logout()">
+                    <i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div id="alertContainer"></div>
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">
+                <i class="fas fa-user-md me-2"></i>
+                Gestión de Doctores
+            </h2>
+            <div>
+                <a href="/dashboard" class="btn btn-secondary me-2">
+                    <i class="fas fa-arrow-left me-2"></i>Volver al Dashboard
+                </a>
+                <button class="btn btn-primary" onclick="openDoctorModal()">
+                    <i class="fas fa-plus me-2"></i>Nuevo Doctor
+                </button>
+            </div>
+        </div>
+
+        <!-- Doctors Table -->
+        <div class="card fade-in">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Especialidad</th>
+                                <th>Email</th>
+                                <th>Teléfono</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="doctorsTableBody">
+                            <tr>
+                                <td colspan="5" class="text-center">Cargando doctores...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Doctor Modal -->
+    <div class="modal fade" id="doctorModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="doctorModalLabel">Nuevo Doctor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="doctorForm">
+                        <input type="hidden" id="doctorId">
+                        <div class="mb-3">
+                            <label class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Especialidad</label>
+                            <select class="form-select" id="specialization" required>
+                                <option value="">Seleccione una especialidad</option>
+                                <option value="Ortodoncista">Ortodoncista</option>
+                                <option value="Endodoncista">Endodoncista</option>
+                                <option value="Periodoncista">Periodoncista</option>
+                                <option value="Prostodoncista">Prostodoncista</option>
+                                <option value="Odontólogo General">Odontólogo General</option>
+                                <option value="Cirujano Oral">Cirujano Oral</option>
+                                <option value="Odontopediatra">Odontopediatra</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Teléfono</label>
+                            <input type="tel" class="form-control" id="phone" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveDoctor()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Función para cerrar sesión
+        async function logout() {
+            try {
+                await fetch('/logout', { method: 'POST' });
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al cerrar sesión');
+            }
+        }
+
+        let doctorModal;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            doctorModal = new bootstrap.Modal(document.getElementById('doctorModal'));
+            loadDoctors();
+        });
+
+        function openDoctorModal() {
+            document.getElementById('doctorId').value = '';
+            document.getElementById('doctorForm').reset();
+            document.getElementById('specialization').value = '';
+            document.getElementById('doctorModalLabel').textContent = 'Nuevo Doctor';
+            doctorModal.show();
+        }
+
+        function showAlert(message, type = 'success') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show`;
+            
+            // Personalizar el icono según el tipo de mensaje
+            let icon = 'fa-check-circle';
+            if (type === 'danger') {
+                icon = 'fa-exclamation-triangle';
+            } else if (type === 'warning') {
+                icon = 'fa-exclamation-circle';
+            }
+            
+            alert.innerHTML = `
+                <div class="alert-content">
+                    <i class="fas ${icon}"></i>
+                    <div class="alert-message">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            
+            alertContainer.innerHTML = '';
+            alertContainer.appendChild(alert);
+            
+            // Auto cerrar después de 8 segundos para mensajes de error
+            const timeout = type === 'danger' ? 8000 : 5000;
+            setTimeout(() => {
+                alert.classList.remove('show');
+                setTimeout(() => alert.remove(), 150);
+            }, timeout);
+        }
+
+        // Función para cargar la lista de doctores
+        async function loadDoctors() {
+            try {
+                const response = await fetch('/doctors/');
+                const doctors = await response.json();
+                const tbody = document.querySelector('#doctorsTableBody');
+                tbody.innerHTML = doctors.length ? doctors.map(doctor => `
+                    <tr>
+                        <td>${doctor.name}</td>
+                        <td>${doctor.specialization}</td>
+                        <td>${doctor.email}</td>
+                        <td>${doctor.phone}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary me-2" onclick="editDoctor(${doctor.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteDoctor(${doctor.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('') : '<tr><td colspan="5" class="text-center">No hay doctores registrados</td></tr>';
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Error al cargar los doctores', 'danger');
+            }
+        }
+
+        // Función para guardar un doctor
+        async function saveDoctor() {
+            const doctorId = document.getElementById('doctorId').value;
+            const doctorData = {
+                name: document.getElementById('name').value,
+                specialization: document.getElementById('specialization').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value
+            };
+
+            try {
+                const url = doctorId ? `/doctors/${doctorId}` : '/doctors/';
+                const method = doctorId ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(doctorData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showAlert(doctorId ? 'Doctor actualizado exitosamente' : 'Doctor guardado exitosamente');
+                    doctorModal.hide();
+                    
+                    // Limpiar el formulario
+                    document.getElementById('doctorForm').reset();
+                    document.getElementById('doctorId').value = '';
+                    
+                    // Recargar la tabla de doctores
+                    await loadDoctors();
+                } else {
+                    throw new Error(data.detail || 'Error al guardar el doctor');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert(error.message, 'danger');
+            }
+        }
+
+        // Función para editar un doctor
+        async function editDoctor(id) {
+            try {
+                const response = await fetch(`/doctors/${id}`);
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Error al cargar los datos del doctor');
+                }
+                const doctor = await response.json();
+                
+                document.getElementById('doctorId').value = doctor.id;
+                document.getElementById('name').value = doctor.name;
+                document.getElementById('specialization').value = doctor.specialization || '';
+                document.getElementById('email').value = doctor.email;
+                document.getElementById('phone').value = doctor.phone;
+                
+                document.getElementById('doctorModalLabel').textContent = 'Editar Doctor';
+                doctorModal.show();
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        // Función para eliminar un doctor
+        async function deleteDoctor(id) {
+            if (!confirm('¿Está seguro de que desea eliminar este doctor?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/doctors/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Error al eliminar el doctor');
+                }
+                
+                const result = await response.json();
+                showAlert(result.message);
+                loadDoctors();
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert(error.message, 'danger');
+            }
+        }
+    </script>
+</body>
+</html> 
