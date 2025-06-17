@@ -20,7 +20,7 @@ setup(
         "flake8",
         "black",
         "jinja2",
-        "email-validator"
+        "email-validator",
     ],
     python_requires=">=3.11",
-) 
+)
