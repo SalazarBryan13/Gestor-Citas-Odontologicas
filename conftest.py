@@ -1,5 +1,6 @@
 import os
 import sys
+import pytest
 from pathlib import Path
 
 # Add the project root directory to Python path
